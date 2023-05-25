@@ -13,17 +13,28 @@ namespace c_follow.Client
         public ClientMain()
         {
             Ped[] peds = new Ped[0]; 
-            API.RegisterCommand("test", new Action<int, List<object>, string>(async (source, args, rawCommand) =>
+            API.RegisterCommand("follow", new Action<int, List<object>, string>(async (source, args, rawCommand) =>
             {
                 if ((bool)args.Any())
                 {
+                    byte cont = 4;
+                    if (args.ElementAtOrDefault(1) != null) 
+                    {
+                        Debug.WriteLine(args[1].ToString());
+                        if (int.TryParse(args[1].ToString(), out _)) {
+                            if (Enumerable.Range(1, 10).Contains((int)args[1]))
+                            {
+                                cont = (byte)args[1];
+                            }
+                        }
+                    }
                     uint Hash = (uint)GetHashKey(args[0].ToString());
                     //Model Hash = PedHash;
-                    Debug.WriteLine(Hash.ToString());
-                    Debug.WriteLine();
+                    //Debug.WriteLine(Hash.ToString());
+                    //Debug.WriteLine();
                     Ped player = Game.Player.Character;
                     API.RequestModel(Hash);
-                    peds = new Ped[4];
+                    peds = new Ped[cont];
                     while (!API.HasModelLoaded(Hash))
                     {
                         await BaseScript.Delay(100);
