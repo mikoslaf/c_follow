@@ -79,7 +79,7 @@ namespace c_follow.Client
                         for (int i = 0; i < peds.Length; i++)
                         {
                             Ped npc = await World.CreatePed((Model)args[0].ToString(), player.Position + (player.ForwardVector * 2));
-                            npc.Task.LookAt(player);
+                            //npc.Task.LookAt(player);
                             npc.Task.FollowToOffsetFromEntity(player, (player.ForwardVector * 2), -1, 10);
 
                             API.SetPedAsGroupMember(npc.Handle, API.GetPedGroupIndex(npc.Handle));
@@ -98,7 +98,38 @@ namespace c_follow.Client
                 }
 
             }), false);
-        }
+            API.RegisterCommand("follow-anim", new Action<int, List<object>, string>(async (source, args, rawCommand) =>
+            {
+                String ani1 = "", ani2 = "";
+                if (args.Count >= 2) 
+                {
+                    ani1 = args[0].ToString();
+                    ani2 = args[1].ToString();
+                }
+                if (ani1 == "" && ani2 == "") 
+                {
+                    Ped player = Game.Player.Character;
+                    foreach (Ped i in peds)
+                    {
+                        i.Task.ClearAllImmediately();
+                        i.Task.FollowToOffsetFromEntity(player, (player.ForwardVector * 2), -1, 10);
+                    }
+                }
+                while (!API.HasAnimDictLoaded(ani1)) 
+                { 
+                    API.RequestAnimDict(ani1);
+                    await BaseScript.Delay(100);
+                }
+                AnimationFlags flags = AnimationFlags.Loop | AnimationFlags.CancelableWithMovement;
+                foreach (Ped i in peds)
+                {
+                    i.Task.ClearAllImmediately();
+                    i.Task.PlayAnimation(ani1, ani2, -1, -1, flags);
+                }
+
+            }), false);
+
+            }
 
 
 
