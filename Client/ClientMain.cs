@@ -12,126 +12,140 @@ namespace c_follow.Client
 {
     public class ClientMain : BaseScript
     {
+        Ped[] peds = new Ped[0];
         public ClientMain()
         {
-            Ped[] peds = new Ped[0];
-            TriggerEvent("chat:addSuggestion", "/follow", "Create npc to follow", new[] { 
+            TriggerEvent("chat:addSuggestion", "/follow", "Create npc to follow", new[] 
+            { 
              new { name = "Model", help = "Name Model for NPC or [Random]"},
              new { name = "Number", help = "Number of NPC [1-10]"},
             });
-            API.RegisterCommand("follow", new Action<int, List<object>, string>(async (source, args, rawCommand) =>
+
+            API.RegisterCommand("follow", new Action<int, List<object>, string>(follow), false);
+
+            TriggerEvent("chat:addSuggestion", "/follow-anim", "Tast play anim for NPC or Reset following", new[] 
             {
-                if ((bool)args.Any())
+             new { name = "dist", help = "dist"},
+             new { name = "anim", help = "anim"},
+            });
+
+            API.RegisterCommand("follow-anim", new Action<int, List<object>, string>(follow_anim), false);
+
+        }
+
+        private async void follow(int source, List<object> args, string raw)
+        {
+            if ((bool)args.Any())
+            {
+                if (peds.Length != 0)
                 {
-                    if (peds.Length != 0) 
+                    foreach (Ped i in peds)
                     {
-                        foreach (Ped i in peds)
+                        i.Delete();
+                    }
+                }
+                byte cont = 4;
+                if (args.ElementAtOrDefault(1) != null)
+                {
+                    if (byte.TryParse(args[1].ToString(), out _))
+                    {
+                        cont = Convert.ToByte(args[1]);
+                        if (cont < 0 && cont > 40) //zmieniæ !!!!
                         {
-                            i.Delete();
+                            cont = 4;
                         }
                     }
-                    byte cont = 4;
-                    if (args.ElementAtOrDefault(1) != null) 
+                }
+
+                Ped player = Game.Player.Character;
+                peds = new Ped[cont];
+
+                if (args[0].ToString() == "Random")
+                {
+                    String[] Names = { "a_f_m_trampbeac_01", "a_f_y_eastsa_03", "a_f_y_hipster_04", "a_m_m_genfat_01", "a_m_m_salton_02", "a_m_y_beachvesp_01", "a_m_y_clubcust_01", "a_m_y_polynesian_01" };
+                    Random rnd = new Random();
+
+                    for (int i = 0; i < peds.Length; i++)
                     {
-                        if (byte.TryParse(args[1].ToString(), out _)) {
-                            cont = Convert.ToByte(args[1]);
-                            if (cont < 0 && cont > 40) //zmieniæ !!!!
-                            {
-                                cont = 4;
-                            }
-                        }
-                    }
-
-                    Ped player = Game.Player.Character;
-                    peds = new Ped[cont];
-
-                    if (args[0].ToString() == "Random") 
-                    {
-                        String[] Names = { "a_f_m_trampbeac_01", "a_f_y_eastsa_03", "a_f_y_hipster_04", "a_m_m_genfat_01", "a_m_m_salton_02", "a_m_y_beachvesp_01", "a_m_y_clubcust_01", "a_m_y_polynesian_01"};
-                        Random rnd = new Random();
-
-                        for (int i = 0; i < peds.Length; i++)
-                        {
-                            Byte rand = (byte)rnd.Next(0, Names.Length);
-                            uint Hash = (uint)GetHashKey(Names[rand]);
-                            API.RequestModel(Hash);
-                            while (!API.HasModelLoaded(Hash))
-                            {
-                                await BaseScript.Delay(100);
-                            }
-
-                            Ped npc = await World.CreatePed((Model)Names[rand], player.Position + (player.ForwardVector * 2));
-                            npc.Task.LookAt(player);
-                            npc.Task.FollowToOffsetFromEntity(player, (player.ForwardVector * 2), -1, 10);
-
-                            API.SetPedAsGroupMember(npc.Handle, API.GetPedGroupIndex(npc.Handle));
-                            API.SetPedCombatAbility(npc.Handle, 2);
-                            peds[i] = npc;
-                        }
-                    } else
-                    {
-                        uint Hash = (uint)GetHashKey(args[0].ToString());
+                        Byte rand = (byte)rnd.Next(0, Names.Length);
+                        uint Hash = (uint)GetHashKey(Names[rand]);
                         API.RequestModel(Hash);
                         while (!API.HasModelLoaded(Hash))
                         {
                             await BaseScript.Delay(100);
                         }
-                        for (int i = 0; i < peds.Length; i++)
-                        {
-                            Ped npc = await World.CreatePed((Model)args[0].ToString(), player.Position + (player.ForwardVector * 2));
-                            //npc.Task.LookAt(player);
-                            npc.Task.FollowToOffsetFromEntity(player, (player.ForwardVector * 2), -1, 10);
 
-                            API.SetPedAsGroupMember(npc.Handle, API.GetPedGroupIndex(npc.Handle));
-                            API.SetPedCombatAbility(npc.Handle, 2);
-                            peds[i] = npc;
-                        }
+                        Ped npc = await World.CreatePed((Model)Names[rand], player.Position + (player.ForwardVector * 2));
+                        npc.Task.LookAt(player);
+                        npc.Task.FollowToOffsetFromEntity(player, (player.ForwardVector * 2), -1, 10);
+
+                        API.SetPedAsGroupMember(npc.Handle, API.GetPedGroupIndex(npc.Handle));
+                        API.SetPedCombatAbility(npc.Handle, 2);
+                        peds[i] = npc;
                     }
-
                 }
-                else { 
-                    foreach (Ped i in peds)
+                else
+                {
+                    uint Hash = (uint)GetHashKey(args[0].ToString());
+                    API.RequestModel(Hash);
+                    while (!API.HasModelLoaded(Hash))
                     {
-                        i.Delete();
+                        await BaseScript.Delay(100);
                     }
-                    peds = new Ped[0];
+                    for (int i = 0; i < peds.Length; i++)
+                    {
+                        Ped npc = await World.CreatePed((Model)args[0].ToString(), player.Position + (player.ForwardVector * 2));
+                        //npc.Task.LookAt(player);
+                        npc.Task.FollowToOffsetFromEntity(player, (player.ForwardVector * 2), -1, 10);
+
+                        API.SetPedAsGroupMember(npc.Handle, API.GetPedGroupIndex(npc.Handle));
+                        API.SetPedCombatAbility(npc.Handle, 2);
+                        peds[i] = npc;
+                    }
                 }
 
-            }), false);
-            API.RegisterCommand("follow-anim", new Action<int, List<object>, string>(async (source, args, rawCommand) =>
+            }
+            else
             {
-                String ani1 = "", ani2 = "";
-                if (args.Count >= 2) 
+                foreach (Ped i in peds)
                 {
-                    ani1 = args[0].ToString();
-                    ani2 = args[1].ToString();
+                    i.Delete();
                 }
-                if (ani1 == "" && ani2 == "") 
-                {
-                    Ped player = Game.Player.Character;
-                    foreach (Ped i in peds)
-                    {
-                        i.Task.ClearAllImmediately();
-                        i.Task.FollowToOffsetFromEntity(player, (player.ForwardVector * 2), -1, 10);
-                    }
-                }
-                while (!API.HasAnimDictLoaded(ani1)) 
-                { 
-                    API.RequestAnimDict(ani1);
-                    await BaseScript.Delay(100);
-                }
-                AnimationFlags flags = AnimationFlags.Loop | AnimationFlags.CancelableWithMovement;
+                peds = new Ped[0];
+            }
+
+        }
+
+        private async void follow_anim(int source, List<object> args, string raw)
+        {
+            String ani1 = "", ani2 = "";
+            if (args.Count >= 2)
+            {
+                ani1 = args[0].ToString();
+                ani2 = args[1].ToString();
+            }
+            if (ani1 == "" && ani2 == "")
+            {
+                Ped player = Game.Player.Character;
                 foreach (Ped i in peds)
                 {
                     i.Task.ClearAllImmediately();
-                    i.Task.PlayAnimation(ani1, ani2, -1, -1, flags);
+                    i.Task.FollowToOffsetFromEntity(player, (player.ForwardVector * 2), -1, 10);
                 }
-
-            }), false);
-
+            }
+            while (!API.HasAnimDictLoaded(ani1))
+            {
+                API.RequestAnimDict(ani1);
+                await BaseScript.Delay(100);
+            }
+            AnimationFlags flags = AnimationFlags.Loop | AnimationFlags.CancelableWithMovement;
+            foreach (Ped i in peds)
+            {
+                i.Task.ClearAllImmediately();
+                i.Task.PlayAnimation(ani1, ani2, -1, -1, flags);
             }
 
-
+        }
 
         //[Tick]
         //public Task OnTick()
