@@ -21,10 +21,13 @@ namespace c_follow.Client
                     if (args.ElementAtOrDefault(1) != null) 
                     {
                         Debug.WriteLine(args[1].ToString());
-                        if (int.TryParse(args[1].ToString(), out _)) {
-                            if (Enumerable.Range(1, 10).Contains((int)args[1]))
+                        if (byte.TryParse(args[1].ToString(), out _)) {
+                            Debug.WriteLine("test1");
+                            cont = Convert.ToByte(args[1]);
+                            if (cont < 0 && cont > 20)
                             {
-                                cont = (byte)args[1];
+                                Debug.WriteLine("test2");
+                                cont = 4;
                             }
                         }
                     }
