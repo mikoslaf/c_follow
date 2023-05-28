@@ -1,17 +1,21 @@
-document.getElementById("submitButton").addEventListener("click", function(event) {
-    event.preventDefault();
-  
-    var data1 = document.getElementById("data1").value;
-    var data2 = document.getElementById("data2").value;
-    var data3 = document.getElementById("data3").value;
-  
-    console.log("Dane 1:", data1);
-    console.log("Dane 2:", data2);
-    console.log("Dane 3:", data3);
-  });
-  
 window.addEventListener("message", function (event) {   
   if(event.data.action == "start") {
     this.document.body.style.display = "block";
   }
+});
+
+document.getElementById("submitButton").addEventListener("click", function(event) {
+  event.preventDefault();
+
+  let Model = document.getElementById("data1").value; 
+  let Cont = parseInt(document.getElementById("data2").value);
+  if(isNaN(Cont)) {
+    Cont = 4; 
+  }
+  let armed = document.getElementById("check1").checked;
+  let combat = document.getElementById("check2").checked;
+  let weapon = document.getElementById("data3").value;
+
+  this.document.body.style.display = "none";
+
 });
