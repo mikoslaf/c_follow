@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -12,7 +13,7 @@ namespace c_follow.Client
 {
     public class ClientMain : BaseScript
     {
-        Ped[] peds = new Ped[0];
+        private Ped[] peds = new Ped[0];
         public ClientMain()
         {
             TriggerEvent("chat:addSuggestion", "/follow", "Create npc to follow", new[] 
@@ -31,12 +32,71 @@ namespace c_follow.Client
 
             API.RegisterCommand("follow-anim", new Action<int, List<object>, string>(follow_anim), false);
 
+            API.RegisterNuiCallbackType("spawn");
+            EventHandlers["__cfx_nui:spawn"] += new Action<ExpandoObject>(spawn);
         }
 
-        private async void follow(int source, List<object> args, string raw)
+        private async void spawn(dynamic data) 
+        {
+            API.SetNuiFocus(false, false);
+            String Model = data.model;
+            byte cont = Convert.ToByte(data.cont);
+            bool armed = data.armed;
+            string weapon = data.weapon;
+            bool combat = data.combat;
+
+            Ped player = Game.Player.Character;
+            peds = new Ped[cont];
+
+            if (Model == "random")
+            {
+                String[] Names = { "a_f_m_trampbeac_01", "a_f_y_eastsa_03", "a_f_y_hipster_04", "a_m_m_genfat_01", "a_m_m_salton_02", "a_m_y_beachvesp_01", "a_m_y_clubcust_01", "a_m_y_polynesian_01" };
+                Random rnd = new Random();
+
+                for (int i = 0; i < peds.Length; i++)
+                {
+                    Byte rand = (byte)rnd.Next(0, Names.Length);
+                    uint Hash = (uint)GetHashKey(Names[rand]);
+                    API.RequestModel(Hash);
+                    while (!API.HasModelLoaded(Hash))
+                    {
+                        await BaseScript.Delay(100);
+                    }
+
+                    Ped npc = await World.CreatePed((Model)Names[rand], player.Position + (player.ForwardVector * 2));
+                    npc.Task.LookAt(player);
+                    npc.Task.FollowToOffsetFromEntity(player, (player.ForwardVector * 2), -1, 10);
+
+                    API.SetPedAsGroupMember(npc.Handle, API.GetPedGroupIndex(npc.Handle));
+                    API.SetPedCombatAbility(npc.Handle, 2);
+                    peds[i] = npc;
+                }
+            }
+            else
+            {
+                uint Hash = (uint)GetHashKey(Model);
+                API.RequestModel(Hash);
+                while (!API.HasModelLoaded(Hash))
+                {
+                    await BaseScript.Delay(100);
+                }
+                for (int i = 0; i < peds.Length; i++)
+                {
+                    Ped npc = await World.CreatePed((Model) Model, player.Position + (player.ForwardVector * 2));
+                    //npc.Task.LookAt(player);
+                    npc.Task.FollowToOffsetFromEntity(player, (player.ForwardVector * 2), -1, 10);
+
+                    API.SetPedAsGroupMember(npc.Handle, API.GetPedGroupIndex(npc.Handle));
+                    API.SetPedCombatAbility(npc.Handle, 2);
+                    peds[i] = npc;
+                }
+            }
+        }
+        private void follow(int source, List<object> args, string raw)
         {
             API.SetNuiFocus(true, true);
             SendNuiMessage("{\"action\":\"start\"}");
+            
             if ((bool)args.Any())
             {
                 if (peds.Length != 0)
@@ -59,52 +119,52 @@ namespace c_follow.Client
                     }
                 }
 
-                Ped player = Game.Player.Character;
-                peds = new Ped[cont];
+                //Ped player = Game.Player.Character;
+                //peds = new Ped[cont];
 
-                if (args[0].ToString() == "Random")
-                {
-                    String[] Names = { "a_f_m_trampbeac_01", "a_f_y_eastsa_03", "a_f_y_hipster_04", "a_m_m_genfat_01", "a_m_m_salton_02", "a_m_y_beachvesp_01", "a_m_y_clubcust_01", "a_m_y_polynesian_01" };
-                    Random rnd = new Random();
+                //if (args[0].ToString() == "Random")
+                //{
+                //    String[] Names = { "a_f_m_trampbeac_01", "a_f_y_eastsa_03", "a_f_y_hipster_04", "a_m_m_genfat_01", "a_m_m_salton_02", "a_m_y_beachvesp_01", "a_m_y_clubcust_01", "a_m_y_polynesian_01" };
+                //    Random rnd = new Random();
 
-                    for (int i = 0; i < peds.Length; i++)
-                    {
-                        Byte rand = (byte)rnd.Next(0, Names.Length);
-                        uint Hash = (uint)GetHashKey(Names[rand]);
-                        API.RequestModel(Hash);
-                        while (!API.HasModelLoaded(Hash))
-                        {
-                            await BaseScript.Delay(100);
-                        }
+                //    for (int i = 0; i < peds.Length; i++)
+                //    {
+                //        Byte rand = (byte)rnd.Next(0, Names.Length);
+                //        uint Hash = (uint)GetHashKey(Names[rand]);
+                //        API.RequestModel(Hash);
+                //        while (!API.HasModelLoaded(Hash))
+                //        {
+                //            await BaseScript.Delay(100);
+                //        }
 
-                        Ped npc = await World.CreatePed((Model)Names[rand], player.Position + (player.ForwardVector * 2));
-                        npc.Task.LookAt(player);
-                        npc.Task.FollowToOffsetFromEntity(player, (player.ForwardVector * 2), -1, 10);
+                //        Ped npc = await World.CreatePed((Model)Names[rand], player.Position + (player.ForwardVector * 2));
+                //        npc.Task.LookAt(player);
+                //        npc.Task.FollowToOffsetFromEntity(player, (player.ForwardVector * 2), -1, 10);
 
-                        API.SetPedAsGroupMember(npc.Handle, API.GetPedGroupIndex(npc.Handle));
-                        API.SetPedCombatAbility(npc.Handle, 2);
-                        peds[i] = npc;
-                    }
-                }
-                else
-                {
-                    uint Hash = (uint)GetHashKey(args[0].ToString());
-                    API.RequestModel(Hash);
-                    while (!API.HasModelLoaded(Hash))
-                    {
-                        await BaseScript.Delay(100);
-                    }
-                    for (int i = 0; i < peds.Length; i++)
-                    {
-                        Ped npc = await World.CreatePed((Model)args[0].ToString(), player.Position + (player.ForwardVector * 2));
-                        //npc.Task.LookAt(player);
-                        npc.Task.FollowToOffsetFromEntity(player, (player.ForwardVector * 2), -1, 10);
+                //        API.SetPedAsGroupMember(npc.Handle, API.GetPedGroupIndex(npc.Handle));
+                //        API.SetPedCombatAbility(npc.Handle, 2);
+                //        peds[i] = npc;
+                //    }
+                //}
+                //else
+                //{
+                //    uint Hash = (uint)GetHashKey(args[0].ToString());
+                //    API.RequestModel(Hash);
+                //    while (!API.HasModelLoaded(Hash))
+                //    {
+                //        await BaseScript.Delay(100);
+                //    }
+                //    for (int i = 0; i < peds.Length; i++)
+                //    {
+                //        Ped npc = await World.CreatePed((Model)args[0].ToString(), player.Position + (player.ForwardVector * 2));
+                //        //npc.Task.LookAt(player);
+                //        npc.Task.FollowToOffsetFromEntity(player, (player.ForwardVector * 2), -1, 10);
 
-                        API.SetPedAsGroupMember(npc.Handle, API.GetPedGroupIndex(npc.Handle));
-                        API.SetPedCombatAbility(npc.Handle, 2);
-                        peds[i] = npc;
-                    }
-                }
+                //        API.SetPedAsGroupMember(npc.Handle, API.GetPedGroupIndex(npc.Handle));
+                //        API.SetPedCombatAbility(npc.Handle, 2);
+                //        peds[i] = npc;
+                //    }
+                //}
 
             }
             else

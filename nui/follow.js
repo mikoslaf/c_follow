@@ -16,10 +16,11 @@ document.getElementById("submitButton").addEventListener("click", function(event
   let combat = document.getElementById("check2").checked;
   let weapon = document.getElementById("data3").value;
 
-  this.document.body.style.display = "none";
+  console.log(armed);
+  document.getElementsByTagName('body')[0].style.display = "none";
   $.post("https://c_follow/spawn", JSON.stringify({
-      Model: Model,
-      Cont: Cont,
+      model: Model,
+      cont: Cont,
       armed: armed,
       combat: combat,
       weapon: weapon,
