@@ -35,6 +35,8 @@ namespace c_follow.Client
 
         private async void follow(int source, List<object> args, string raw)
         {
+            API.SetNuiFocus(true, true);
+            SendNuiMessage("{\"action\":\"start\"}");
             if ((bool)args.Any())
             {
                 if (peds.Length != 0)
