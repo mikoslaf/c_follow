@@ -17,5 +17,11 @@ document.getElementById("submitButton").addEventListener("click", function(event
   let weapon = document.getElementById("data3").value;
 
   this.document.body.style.display = "none";
-
+  $.post("https://c_follow/spawn", JSON.stringify({
+      Model: Model,
+      Cont: Cont,
+      armed: armed,
+      combat: combat,
+      weapon: weapon,
+  }));
 });
