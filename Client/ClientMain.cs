@@ -42,7 +42,7 @@ namespace c_follow.Client
             EventHandlers["__cfx_nui:c_kill"] += new Action(kill);
 
             API.RegisterNuiCallbackType("c_cancel");
-            EventHandlers["__cfx_nui:c_kill"] += new Action(cancel);
+            EventHandlers["__cfx_nui:c_cancel"] += new Action(cancel);
 
             API.RegisterNuiCallbackType("c_follow");
             EventHandlers["__cfx_nui:c_follow"] += new Action(follow_again);
@@ -77,10 +77,10 @@ namespace c_follow.Client
 
                     Ped npc = await World.CreatePed((Model)Names[rand], player.Position + (player.ForwardVector * 2));
                     //npc.Task.LookAt(player);
-                    npc.Task.FollowToOffsetFromEntity(player, (player.ForwardVector * 2), -1, 10);
+                    //npc.Task.FollowToOffsetFromEntity(player, (player.ForwardVector * 2), -1, 10);
 
-                    API.SetPedAsGroupMember(npc.Handle, API.GetPedGroupIndex(npc.Handle));
-                    API.SetPedCombatAbility(npc.Handle, 2);
+                    //API.SetPedAsGroupMember(npc.Handle, API.GetPedGroupIndex(npc.Handle));
+                    //API.SetPedCombatAbility(npc.Handle, 2);
                     peds[i] = npc;
                 }
             }
@@ -96,11 +96,33 @@ namespace c_follow.Client
                 {
                     Ped npc = await World.CreatePed((Model) Model, player.Position + (player.ForwardVector * 2));
                     //npc.Task.LookAt(player);
-                    npc.Task.FollowToOffsetFromEntity(player, (player.ForwardVector * 2), -1, 10);
+                    //npc.Task.FollowToOffsetFromEntity(player, (player.ForwardVector * 2), -1, 10);
 
-                    API.SetPedAsGroupMember(npc.Handle, API.GetPedGroupIndex(npc.Handle));
-                    API.SetPedCombatAbility(npc.Handle, 2);
+                    //API.SetPedAsGroupMember(npc.Handle, API.GetPedGroupIndex(npc.Handle));
+                    //API.SetPedCombatAbility(npc.Handle, 2);
                     peds[i] = npc;
+                }
+            }
+
+            foreach (Ped i in peds) 
+            {
+                i.Task.FollowToOffsetFromEntity(player, (player.ForwardVector * 2), -1, 10);
+                API.SetPedAsGroupMember(i.Handle, API.GetPedGroupIndex(peds[0].Handle));
+                API.SetPedCombatAbility(i.Handle, 2);
+
+                if (weapon != "") 
+                {
+                    API.GiveWeaponToPed(i.Handle, (uint)GetHashKey(weapon), 5000, armed, true);
+                }
+
+                if (combat)
+                {
+                    API.SetPedCombatAbility(i.Handle, 2);
+                }
+                else 
+                {
+                    API.SetPedFleeAttributes(i.Handle, 0, true);
+                    API.SetPedCombatAttributes(i.Handle, 17, true);
                 }
             }
         }
