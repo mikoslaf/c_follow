@@ -14,7 +14,7 @@ document.getElementById("submitButton").addEventListener("click", function(event
   if(isNaN(Cont)) {
     Cont = 4; 
   } else {
-    if(Cont < 0 && Cont > 20) {
+    if(Cont < 0 && Cont > 15) {
       Cont = 4;
     }
   }
