@@ -62,7 +62,7 @@ namespace c_follow.Client
 
             if (Model == "random")
             {
-                String[] Names = { "a_f_m_trampbeac_01", "a_f_y_eastsa_03", "a_f_y_hipster_04", "a_m_m_genfat_01", "a_m_m_salton_02", "a_m_y_beachvesp_01", "a_m_y_clubcust_01", "a_m_y_polynesian_01" };
+                String[] Names = { "a_m_m_ktown_01", "a_m_y_beachvesp_02", "a_m_y_business_02", "a_m_y_gencaspat_01", "a_m_o_tramp_01", "a_m_m_soucent_01", "g_f_y_vagos_01", "g_f_y_families_01", "g_f_y_ballas_01", "g_m_y_mexgoon_03" };
                 Random rnd = new Random();
 
                 for (int i = 0; i < peds.Length; i++)
@@ -107,7 +107,8 @@ namespace c_follow.Client
             foreach (Ped i in peds) 
             {
                 i.Task.FollowToOffsetFromEntity(player, (player.ForwardVector * 2), -1, 10);
-                API.SetPedAsGroupMember(i.Handle, API.GetPedGroupIndex(peds[0].Handle));
+                //API.SetPedAsGroupMember(i.Handle, API.GetPedGroupIndex(peds[0].Handle));
+                API.SetPedRelationshipGroupHash(i.Handle, (uint)GetHashKey("SECURITY_GUARD"));
                 API.SetPedCombatAbility(i.Handle, 2);
 
                 if (weapon != "") 
