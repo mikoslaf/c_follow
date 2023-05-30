@@ -11,7 +11,6 @@ files {
 }
 
 client_script 'Client/bin/Release/**/publish/*.net.dll'
-server_script 'Server/bin/Release/**/publish/*.net.dll'
 
 author 'mikoslaf'
 version '1.0.0'

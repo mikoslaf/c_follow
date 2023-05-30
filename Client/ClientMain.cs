@@ -1,12 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 using CitizenFX.Core;
 using CitizenFX.Core.Native;
-using CitizenFX.Core.UI;
 using static CitizenFX.Core.Native.API;
 
 namespace c_follow.Client
