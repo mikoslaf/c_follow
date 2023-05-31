@@ -1,4 +1,4 @@
-fx_version 'bodacious'
+fx_version 'mono_rt2'
 game 'gta5'
 
 ui_page 'nui/index.html'

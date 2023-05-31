@@ -12,6 +12,17 @@ namespace c_follow.Client
         private Ped[] peds = new Ped[0];
         public ClientMain()
         {
+
+            EventHandlers["onClientResourceStart"] += new Action<string>(OnClientResourceStart);
+
+        }
+        private void OnClientResourceStart(string resourceName) 
+        {
+            if (resourceName != GetCurrentResourceName())
+            {
+                return;
+            }
+
             TriggerEvent("chat:addSuggestion", "/follow", "Create npc to follow/open menu");
 
 
@@ -43,7 +54,6 @@ namespace c_follow.Client
             API.RegisterNuiCallbackType("c_follow");
             EventHandlers["__cfx_nui:c_follow"] += new Action(follow_again);
         }
-
         private async void spawn(dynamic data) 
         {
             API.SetNuiFocus(false, false);
